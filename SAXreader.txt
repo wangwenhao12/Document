@@ -1,0 +1,31 @@
+AXReader saxReader = new SAXReader();
+//
+//            ByteArrayInputStream byteArrayInputStream=new ByteArrayInputStream(flowResultStr.getBytes());
+//            Document read;
+//            read = saxReader.read(byteArrayInputStream);
+
+
+//            Document read = saxReader.read(flowResultStr);
+
+
+
+
+List<Element> elements = rootElement.element("Body")
+                    .element("GetBonusledgerRecordResponse")
+                    .element("GetBonusledgerRecordResult")
+                    .element("DATA")
+                    .elements();
+
+
+
+
+ Document read = DocumentHelper.parseText(flowResultStr);
+
+            Element rootElement = read.getRootElement();
+
+            List<Element> elements = rootElement.element("Body")
+                    .element("GetBonusledgerRecordResponse")
+                    .element("GetBonusledgerRecordResult")
+                    .element("DATA")
+                    .elements();
+

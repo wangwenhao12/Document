@@ -1,0 +1,15 @@
+Pattern pattern = compile("<" + "DATA" + ">(.*?)</" + "DATA>");
+        Matcher matcher = pattern.matcher(flowResultStr);
+
+        ArrayList<FlowResultVO> flowResultVOS = new ArrayList<>();
+        if (matcher.find()) {
+            String scoreInfoResult = matcher.group(1);
+            //转成list类型
+            FlowResultList flowResultList = XStreamUtil.xmlToBean(scoreInfoResult, FlowResultList.class);
+            for (FlowResultBo flowResultBo : flowResultList.getFlowResultBos()) {
+
+                FlowResultVO flowResultVO = new FlowResultVO();
+                BeanUtils.copyProperties(flowResultBo, flowResultVO);
+                flowResultVOS.add(flowResultVO);
+            }
+        } 

@@ -1,0 +1,270 @@
+简介
+
+Builder模式是一步一步创建一个复杂对象的创建型模式，它允许用户在不知道内部构建细节的情况下，可以更精细的控制对象的构造流程。该模式是为了将构建复杂对象的过程和它的部件解耦，使得构建过程和部件的表示隔离开来，两者之间的耦合度也降到最低。
+
+定义
+
+将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示。
+
+使用场景
+
+1.相同的方法，不同的执行顺序，产生不同的事件结果。（View的封装，对外暴露的方法不同）
+
+2.多个部件或零件，都可以装配到一个对象中，但是产生的运行结果又不相同时
+
+3.产品类非常复杂，或者产品类中的调用顺序不同产生了不同的作用
+
+4.初始化一个对象特别复杂，如参数特别多且很多都具有默认参数时
+
+关键点
+
+原始版-四个角色
+
+一个产品类—需要被构建的产品
+
+一个抽象Build类—隔离产品组件的构建
+
+一个具体构建产品的Build实现类—产品组件的具体构建
+
+一个组装类—组件与产品的组装
+
+简易版—两个角色
+
+一个产品类—需要被构建的产品
+
+一个Builder类—一般为产品类的静态内部类，负责组件的具体构建和产品的组装
+
+实现
+
+例:
+
+原始版
+
+/**
+ * 产品类-Computer
+ */
+public class Computer {
+
+    private String mBoard;
+    private String mDisplay;
+    private String mOS;
+
+    public String getmBoard() {
+        return mBoard;
+    }
+
+    public void setmBoard(String mBoard) {
+        this.mBoard = mBoard;
+    }
+
+    public String getmDisplay() {
+        return mDisplay;
+    }
+
+    public void setmDisplay(String mDisplay) {
+        this.mDisplay = mDisplay;
+    }
+
+    public String getmOS() {
+        return mOS;
+    }
+
+    public void setmOS() {
+        this.mOS = mOS;
+    }
+}
+
+    
+
+/**
+ * 抽象Build类-构建与产品类相关的部件
+ */
+public abstract class Builder {
+
+    /**
+     *构建主机组件
+     */
+    public abstract void setBoard(String board);
+
+    /**
+     * 构建显示器组件
+     */
+    public abstract void setDisplay(String display);
+
+    /**
+     * 构建操作系统组件
+     */
+    public abstract void setOs();
+
+    /**
+     * 构建产品
+     */
+    public abstract Computer create();
+}
+
+
+/**
+ * 抽象Build的实现类-真正构建产品的类
+ */
+public class ComputerBuilder extends Builder {
+
+    private Computer computer = new Computer();
+
+    @Override
+    public void setBoard(String board) {
+        computer.setmBoard(board);
+    }
+
+    @Override
+    public void setDisplay(String display) {
+        computer.setmDisplay(display);
+    }
+
+    @Override
+    public void setOs() {
+        computer.setmOS();
+    }
+
+    @Override
+    public Computer create() {
+        return computer;
+    }
+}
+
+   
+
+/**
+ * 组装类：将builder构建的产品部件组装成产品,对外隐藏内部组装细节
+ */
+public class Director {
+
+    private Builder mBuilder;
+
+    public Director(Builder builder) {
+        this.mBuilder = builder;
+    }
+
+    public void construct(String board, String display) {
+        mBuilder.setBoard(board);
+        mBuilder.setDisplay(display);
+        mBuilder.setOs();
+    }
+}
+
+    
+
+使用
+
+Builder builder = new ComputerBuilder();
+        Director director = new Director(builder);
+        director.construct("因特尔主板", "三星显示器");
+        Computer computer = builder.create();
+
+    1
+    2
+    3
+    4
+
+简易版
+
+`/**
+* 产品类-Computer
+*/
+public class Computer {
+
+private String mBoard;
+private String mDisplay;
+private String mOS;
+
+public String getmBoard() {
+    return mBoard;
+}
+
+public void setmBoard(String mBoard) {
+    this.mBoard = mBoard;
+}
+
+public String getmDisplay() {
+    return mDisplay;
+}
+
+public void setmDisplay(String mDisplay) {
+    this.mDisplay = mDisplay;
+}
+
+public String getmOS() {
+    return mOS;
+}
+
+public void setmOS() {
+    this.mOS = mOS;
+}
+
+
+public static class Builder {
+
+    private String mBoard;
+    private String mDisplay;
+    private String mOS;
+
+    public Builder setBoard(String board) {
+        this.mBoard = board;
+        return this;
+    }
+
+    public Builder setDisplay(String display) {
+        this.mDisplay = display;
+        return this;
+    }
+
+    public Builder setOs() {
+        return this;
+    }
+
+    /**
+     * 组装产品
+     */
+    private void construct(Computer computer) {
+        computer.setmBoard(mBoard);
+        computer.setmDisplay(mDisplay);
+        computer.setmOS();
+    }
+
+    public Computer create() {
+        Computer computer = new Computer();
+        construct(computer);
+        return computer;
+    }
+}
+
+    
+
+使用
+
+    1
+
+Computer computer = new Computer.Builder().setBoard("")
+                .setDisplay("")
+                .setOs()
+                .create();
+
+    
+
+小结
+
+Builder模式通常作为配置类的构建器将配置的构建和表示分离开来，同时也是将配置从目标类中隔离出来，避免作为过多的setter方法。Builder模式比较常见的实现形式是通过链式调用，这样使得代码更加简洁、易懂。
+
+优点:
+
+1.良好的封装性，使用建造者模式可以使客户端不必知道产品内部组成的细节
+
+2.建造者独立，容易扩展
+
+缺点：
+
+会产生多余的Builder对象以及Director对象，消耗内存
+--------------------- 
+作者：LBJFxd 
+来源：CSDN 
+原文：https://blog.csdn.net/fanxudonggreat/article/details/78927773 
+版权声明：本文为博主原创文章，转载请附上博文链接！
