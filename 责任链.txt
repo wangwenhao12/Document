@@ -1,0 +1,451 @@
+/**
+ * 类描述：请假对象
+ *
+ * @author lzy
+ */
+public class Request {
+     private String name;
+ 
+     private String reason;
+ 
+     private int days;
+ 
+     private String groupLeaderInfo;
+ 
+     private String managerInfo;
+ 
+     private String departmentHeaderInfo;
+ 
+     private String customInfo;
+ 
+     public Request(Builder builder) {
+          super();
+          this.name = builder.name;
+          this.reason = builder.reason;
+          this.days = builder.days;
+          this.groupLeaderInfo = builder.groupLeaderInfo;
+          this.managerInfo = builder.managerInfo;
+          this.departmentHeaderInfo = builder.departmentHeaderInfo;
+          this.customInfo = builder.customInfo;
+     }
+ 
+     public static class Builder {
+          public String name;
+ 
+          public String reason;
+ 
+          public int days;
+ 
+          public String groupLeaderInfo;
+ 
+          public String managerInfo;
+ 
+          public String departmentHeaderInfo;
+ 
+          public String customInfo;
+ 
+          public Builder() {
+ 
+          }
+ 
+          public Builder setName(String name) {
+              this.name = name;
+              return this;
+          }
+ 
+          public Builder setReason(String reason) {
+              this.reason = reason;
+              return this;
+          }
+ 
+          public Builder setDays(int days) {
+              this.days = days;
+              return this;
+          }
+ 
+          public Builder setGroupLeaderInfo(String groupLeaderInfo) {
+              this.groupLeaderInfo = groupLeaderInfo;
+              return this;
+          }
+ 
+          public Builder setManagerInfo(String managerInfo) {
+              this.managerInfo = managerInfo;
+              return this;
+          }
+ 
+          public Builder setDepartmentHeaderInfo(String departmentHeaderInfo) {
+              this.departmentHeaderInfo = departmentHeaderInfo;
+              return this;
+          }
+ 
+          public Builder setCustomInfo(String customInfo) {
+              this.customInfo = customInfo;
+              return this;
+          }
+ 
+          public Builder newRequest(Request request) {
+              this.name = request.name;
+              this.days = request.days;
+              this.reason = request.reason;
+              if (request.groupLeaderInfo != null
+                        && !request.groupLeaderInfo.equals("")) {
+                   this.groupLeaderInfo = request.groupLeaderInfo;
+              }
+ 
+              if (request.managerInfo != null && !request.managerInfo.equals("")) {
+                   this.managerInfo = request.managerInfo;
+              }
+ 
+              if (request.departmentHeaderInfo != null
+                        && !request.departmentHeaderInfo.equals("")) {
+                   this.departmentHeaderInfo = request.departmentHeaderInfo;
+              }
+ 
+              if (request.customInfo != null && !request.customInfo.equals("")) {
+                   this.customInfo = request.customInfo;
+              }
+              
+ 
+              return this;
+          }
+ 
+          public Request build() {
+              return new Request(this);
+          }
+     }
+ 
+     public String name() {
+          return name;
+     }
+ 
+     public String reason() {
+          return reason;
+     }
+ 
+     public int days() {
+          return days;
+     }
+ 
+     public String groupLeaderInfo() {
+          return groupLeaderInfo;
+     }
+ 
+     public String managerInfo() {
+          return managerInfo;
+     }
+ 
+     public String departmentHeaderInfo() {
+          return departmentHeaderInfo;
+     }
+ 
+     public String customInfo() {
+          return customInfo;
+     }
+ 
+     @Override
+     public String toString() {
+          return "Request [name=" + name + ", reason=" + reason + ", days="
+                   + days + ",customInfo=" + customInfo + ", groupLeaderInfo="
+                   + groupLeaderInfo + ", managerInfo=" + managerInfo
+                   + ", departmentHeaderInfo=" + departmentHeaderInfo + "]";
+     }
+ 
+}
+
+
+
+
+——————
+/**
+ * 类描述：结果对象
+ *
+ * @author lzy
+ *
+ */
+public class Result {
+     public boolean isRatify;
+     public String info;
+ 
+     public Result() {
+ 
+     }
+ 
+     public Result(boolean isRatify, String info) {
+          super();
+          this.isRatify = isRatify;
+          this.info = info;
+     }
+ 
+     public boolean isRatify() {
+          return isRatify;
+     }
+ 
+     public void setRatify(boolean isRatify) {
+          this.isRatify = isRatify;
+     }
+ 
+     public String getReason() {
+          return info;
+     }
+ 
+     public void setReason(String info) {
+          this.info = info;
+     }
+ 
+     @Override
+     public String toString() {
+          return "Result [isRatify=" + isRatify + ", info=" + info + "]";
+     }
+}
+——————————
+/**
+ * 接口描述：处理请求
+ *
+ * @author lzy
+ *
+ */
+public interface Ratify {
+     // 处理请求
+     public Result deal(Chain chain);
+ 
+     /**
+      * 接口描述：对request和Result封装，用来转发
+      */
+     interface Chain {
+          // 获取当前request
+          Request request();
+ 
+          // 转发request
+          Result proceed(Request request);
+     }
+}
+——————————————
+/**
+ * 类描述：实现Chain的真正的包装Request和转发功能
+ *
+ * @author lzy
+ *
+ */
+public class RealChain implements Chain {
+     public Request request;
+     public List<Ratify> ratifyList;
+     public int index;
+ 
+     /**
+      * 构造方法
+      *
+      * @param ratifyList
+      *            Ratify接口的实现类集合
+      * @param request
+      *            具体的请求Request实例
+      * @param index
+      *            已经处理过该request的责任人数量
+      */
+     public RealChain(List<Ratify> ratifyList, Request request, int index) {
+          this.ratifyList = ratifyList;
+          this.request = request;
+          this.index = index;
+     }
+ 
+     /**
+      * 方法描述：具体转发功能
+      */
+     @Override
+     public Result proceed(Request request) {
+          Result proceed = null;
+          if (ratifyList.size() > index) {
+              RealChain realChain = new RealChain(ratifyList, request, index + 1);
+              Ratify ratify = ratifyList.get(index);
+              proceed = ratify.deal(realChain);
+          }
+ 
+          return proceed;
+     }
+ 
+     /**
+      * 方法描述：返回当前Request对象或者返回当前进行包装后的Request对象
+      */
+     @Override
+     public Request request() {
+          return request;
+     }
+ 
+}
+——————————————
+/**
+ * 组长
+ *
+ * @author lzy
+ *
+ */
+public class GroupLeader implements Ratify {
+ 
+     @Override
+     public Result deal(Chain chain) {
+          Request request = chain.request();
+          System.out.println("GroupLeader=====>request:" + request.toString());
+ 
+          if (request.days() > 1) {
+              // 包装新的Request对象
+              Request newRequest = new Request.Builder().newRequest(request)
+                        .setManagerInfo(request.name() + "平时表现不错，而且现在项目也不忙")
+                        .build();
+              return chain.proceed(newRequest);
+          }
+ 
+          return new Result(true, "GroupLeader：早去早回");
+     }
+}
+ 
+ 
+/**
+ * 经理
+ *
+ * @author lzy
+ *
+ */
+public class Manager implements Ratify {
+ 
+     @Override
+     public Result deal(Chain chain) {
+          Request request = chain.request();
+          System.out.println("Manager=====>request:" + request.toString());
+          if (request.days() > 3) {
+              // 构建新的Request
+              Request newRequest = new Request.Builder().newRequest(request)
+                        .setManagerInfo(request.name() + "每月的KPI考核还不错，可以批准")
+                        .build();
+              return chain.proceed(newRequest);
+ 
+          }
+          return new Result(true, "Manager：早点把事情办完，项目离不开你");
+     }
+ 
+}
+ 
+/**
+ * 部门领导
+ *
+ * @author lzy
+ *
+ */
+public class DepartmentHeader implements Ratify {
+ 
+     @Override
+     public Result deal(Chain chain) {
+          Request request = chain.request();
+          System.out.println("DepartmentHeader=====>request:"
+                   + request.toString());
+          if (request.days() > 7) {
+              return new Result(false, "你这个完全没必要");
+          }
+          return new Result(true, "DepartmentHeader：不要着急，把事情处理完再回来！");
+     }
+ 
+}
+————————————————
+/**
+ * 类描述：责任链模模式工具类
+ *
+ * @author lzy
+ *
+ */
+public class ChainOfResponsibilityClient {
+private ArrayList<Ratify> ratifies;
+ 
+     public ChainOfResponsibilityClient() {
+          ratifies = new ArrayList<Ratify>();
+     }
+ 
+     /**
+      * 方法描述：为了展示“责任链模式”的真正的迷人之处（可扩展性），在这里构造该方法以便添加自定义的“责任人”
+      *
+      * @param ratify
+      */
+     public void addRatifys(Ratify ratify) {
+          ratifies.add(ratify);
+     }
+ 
+     /**
+      * 方法描述：执行请求
+      *
+      * @param request
+      * @return
+      */
+     public Result execute(Request request) {
+          ArrayList<Ratify> arrayList = new ArrayList<Ratify>();
+          arrayList.addAll(ratifies);
+          arrayList.add(new GroupLeader());
+          arrayList.add(new Manager());
+          arrayList.add(new DepartmentHeader());
+ 
+          RealChain realChain = new RealChain(this, arrayList, request, 0);
+          return realChain.proceed(request);
+     }
+    
+}
+————————————————
+/**
+ * 类描述：责任链模式测试类
+ *
+ * @author lzy
+ *
+ */
+public class Main {
+ 
+     public static void main(String[] args) {
+ 
+          Request request = new Request.Builder().setName("张三").setDays(5)
+                   .setReason("事假").build();
+          ChainOfResponsibilityClient client = new ChainOfResponsibilityClient();
+          Result result = client.execute(request);
+ 
+          System.out.println("结果：" + result.toString());
+     } 
+}
+——————————
+/**
+ * 类描述：自定义“责任人”
+ *
+ * @author lzy
+ *
+ */
+public class CustomInterceptor implements Ratify {
+ 
+     @Override
+     public Result deal(Chain chain) {
+          Request request = chain.request();
+          System.out.println("CustomInterceptor=>" + request.toString());
+          String reason = request.reason();
+          if (reason != null && reason.equals("事假")) {
+              Request newRequest = new Request.Builder().newRequest(request)
+                        .setCustomInfo(request.name() + "请的是事假，而且很着急，请领导重视一下")
+                        .build();
+              System.out.println("CustomInterceptor=>转发请求");
+              return chain.proceed(newRequest);
+          }
+          return new Result(true, "同意请假");
+     }
+ 
+}
+————————————
+/**
+ * 类描述：责任链模式测试类
+ *
+ * @author lzy
+ *
+ */
+public class Main {
+ 
+     public static void main(String[] args) {
+ 
+          Request request = new Request.Builder().setName("张三").setDays(5)
+                   .setReason("事假").build();
+          ChainOfResponsibilityClient client = new ChainOfResponsibilityClient();
+          client.addRatifys(new CustomInterceptor());
+          Result result = client.execute(request);
+ 
+          System.out.println("结果：" + result.toString());
+     }
+ 
+}
