@@ -1,0 +1,8 @@
+臥心侃諒籾議旗鷹佩��
+top
+ps -mp 123(pid) -o THREAD,tid,time
+printf "%x\n" 456(tid)
+jstack pid | grep tid -A 30
+
+！！！！！！！！！！！！！！！！！！！！！！
+！！！！！！！！！！！！！！！！！！！！！！
